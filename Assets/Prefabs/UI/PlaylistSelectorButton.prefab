@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2332764634568112760}
   - component: {fileID: 2332764634568112761}
   - component: {fileID: 2332764634568112758}
-  - component: {fileID: 2332764634568112763}
+  - component: {fileID: 3421753695069344424}
   m_Layer: 5
   m_Name: PlaylistSelectorButton
   m_TagString: Untagged
@@ -124,7 +124,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2332764634568112763
+--- !u!114 &3421753695069344424
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

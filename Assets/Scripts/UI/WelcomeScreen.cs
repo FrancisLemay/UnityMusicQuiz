@@ -1,8 +1,11 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class WelcomeScreen : MonoBehaviour
 {
+    public RectTransform background;
+
     public ScrollRect playlistScrollRect;
 
     public GameObject playlistPrefab;
@@ -28,8 +31,8 @@ public class WelcomeScreen : MonoBehaviour
             // For each playlist inside the Playlists array, instantiate a playlist selector prefab inside the scroll view content component.
             GameObject temp = Instantiate(playlistPrefab, playlistScrollRect.content);
 
-            // Load the playlist info on the instantiated prefab by passing the index of the playlist in the array + the title.
             temp.TryGetComponent(out PlaylistSelector tempPlaylistSelector);
+
             tempPlaylistSelector.LoadPlaylistInfo(i, QuizGameManager.Instance.Playlists.playlists[i].playlist);
         }
     }
