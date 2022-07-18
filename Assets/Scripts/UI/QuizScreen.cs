@@ -1,13 +1,13 @@
 using DG.Tweening;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class QuizScreen : MonoBehaviour
 {
     public RectTransform background;
+
+    public TMPro.TMP_Text title;
 
     public Image songClipThumbnail;
 
@@ -17,82 +17,69 @@ public class QuizScreen : MonoBehaviour
     public Color invalidChoiceColor;
 
     [SerializeField]
-    private List<AudioClip> _songClips = new List<AudioClip>();
-    
-    [SerializeField]
-    private List<Texture2D> _songThumbnails = new List<Texture2D>();
-
-    [SerializeField]
     private List<ChoiceButton> _choiceButtons = new List<ChoiceButton>();
 
-    public IEnumerator GetSongThumbnails(List<string> thumbnailUrls)
+    private void Awake()
     {
-        if (thumbnailUrls == null || thumbnailUrls.Count == 0)
+        EventManager.OnQuizGameStateChanged += OnQuizGameStateChanged;
+    }
+
+    private void OnDestroy()
+    {
+        EventManager.OnQuizGameStateChanged -= OnQuizGameStateChanged;
+    }
+
+    #region Quiz Game State Functions
+    private void OnQuizGameStateChanged(QuizGameManager.QuizGameState quizGameState)
+    {
+        switch (quizGameState)
         {
-            yield break;
-        }
-
-        // First, clear the _songThumbnails list
-        _songThumbnails.Clear();
-
-        foreach (string thumbnailUrl in thumbnailUrls)
-        {
-            UnityWebRequest www = UnityWebRequestTexture.GetTexture(thumbnailUrl);
-            yield return www.SendWebRequest();
-
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                Debug.Log(www.error);
-            }
-            else
-            {
-                Texture2D myTexture = ((DownloadHandlerTexture)www.downloadHandler).texture;
-                if (myTexture != null)
-                {
-                    _songThumbnails.Add(myTexture);
-                }
-            }
+            case QuizGameManager.QuizGameState.PreparingQuiz:
+                OnPreparingQuiz();
+                break;
+            case QuizGameManager.QuizGameState.QuizScreen:
+                OnQuizStarted();
+                break;
+            default:
+                break;
         }
     }
 
-    public IEnumerator GetSongClips(List<string> songUrls)
+    private void OnPreparingQuiz()
     {
-        if (songUrls == null || songUrls.Count == 0)
+        if (background != null)
         {
-            yield break;
+            background.transform.localScale = Vector3.zero;
+
+            background.gameObject.SetActive(true);
+
+            background.transform.DOScale(1, 0.5f);
         }
 
-        // First, clear the _songClips list
-        _songClips.Clear();
-
-        foreach (string songUrl in songUrls)
-        {
-            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(songUrl, AudioType.WAV);
-            yield return www.SendWebRequest();
-
-            if (www.result == UnityWebRequest.Result.ConnectionError)
-            {
-                Debug.Log(www.error);
-            }
-            else
-            {
-                AudioClip myClip = DownloadHandlerAudioClip.GetContent(www);
-                if (myClip != null)
-                {
-                    _songClips.Add(myClip);
-                }
-            }
-        }
+        // Update the title text to: Preparing Quiz...
+        UpdateQuizTitleText("Preparing Quiz...");
     }
 
-    public void OnQuizStarted()
+    private void OnQuizStarted()
     {
-        background.transform.localScale = Vector3.zero;
-        background.gameObject.SetActive(true);
-        // Start a growing animation for the Quiz Screen UI and once its finished, play the current question song clip
-        background.transform.DOScale(1, 1f).OnComplete(delegate { PlayCurrentQuestionSongClip(); });
+        // Update the title text to the playlist name
+        UpdateQuizTitleText("Guess the song | " + QuizGameManager.Instance.CurrentQuizPlaylist.playlist);
 
         ApplyChoiceTexts();
+
+        PlayCurrentQuestionSongClip();
+    }
+    #endregion
+
+    #region Quiz UI Functions
+    private void UpdateQuizTitleText(string text)
+    {
+        if (title == null)
+        {
+            return;
+        }
+
+        title.text = text;
     }
 
     private void ApplyChoiceTexts()
@@ -122,10 +109,11 @@ public class QuizScreen : MonoBehaviour
         }
 
         // Display the clip thumbnail for the question
-        Texture2D tempTexture2D = _songThumbnails[QuizGameManager.Instance.CurrentQuizQuestionId];
+        Texture2D tempTexture2D = QuizAssetsManager.Instance.QuizSongThumbnails[QuizGameManager.Instance.CurrentQuizQuestionId];
         songClipThumbnail.sprite = Sprite.Create(tempTexture2D, new Rect(0f, 0f, tempTexture2D.width, tempTexture2D.height), new Vector2(0.5f, 0.5f), 100);
 
         // TODO Update choice that was selected and go through the next question
+        _choiceButtons[0].transform.GetSiblingIndex();
     }
 
     private void PlayCurrentQuestionSongClip()
@@ -135,7 +123,8 @@ public class QuizScreen : MonoBehaviour
             return;
         }
 
-        audioSource.clip = _songClips[QuizGameManager.Instance.CurrentQuizQuestionId];
+        audioSource.clip = QuizAssetsManager.Instance.QuizSongClips[QuizGameManager.Instance.CurrentQuizQuestionId];
         audioSource.Play();
     }
+    #endregion
 }

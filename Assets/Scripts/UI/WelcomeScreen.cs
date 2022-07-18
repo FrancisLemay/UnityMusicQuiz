@@ -10,7 +10,19 @@ public class WelcomeScreen : MonoBehaviour
 
     public GameObject playlistPrefab;
 
-    public void RefreshPlaylistsList()
+    private void Awake()
+    {
+        EventManager.OnPlaylistsFetched += RefreshPlaylistsList;
+        EventManager.OnQuizGameStateChanged += OnQuizGameStateChanged;
+    }
+
+    private void OnDestroy()
+    {
+        EventManager.OnPlaylistsFetched -= RefreshPlaylistsList;
+        EventManager.OnQuizGameStateChanged -= OnQuizGameStateChanged;
+    }
+
+    private void RefreshPlaylistsList()
     {
         if (QuizGameManager.Instance == null)
         {
@@ -34,6 +46,18 @@ public class WelcomeScreen : MonoBehaviour
             temp.TryGetComponent(out PlaylistSelector tempPlaylistSelector);
 
             tempPlaylistSelector.LoadPlaylistInfo(i, QuizGameManager.Instance.Playlists.playlists[i].playlist);
+        }
+    }
+
+    private void OnQuizGameStateChanged(QuizGameManager.QuizGameState quizGameState)
+    {
+        switch (quizGameState)
+        {
+            case QuizGameManager.QuizGameState.PreparingQuiz:
+                background.transform.DOScale(0, 0.5f).OnComplete(delegate { background.gameObject.SetActive(false); });
+                break;
+            default:
+                break;
         }
     }
 }

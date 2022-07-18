@@ -1,9 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
-using DG.Tweening;
 
 public class QuizGameManager : MonoBehaviour
 {
@@ -32,34 +29,26 @@ public class QuizGameManager : MonoBehaviour
     private Playlist _currentQuizPlaylist = null;
     public Playlist CurrentQuizPlaylist { get { return _currentQuizPlaylist; } }
 
-    [SerializeField]
-    private WelcomeScreen _welcomeScreen = null;
-
-    [SerializeField]
-    private QuizScreen _quizScreen = null;
 
     private void Awake()
     {
         _instance = this;
+
+        EventManager.OnQuizAssetReady += OnQuizAssetReady;
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        _currentQuizGameState = QuizGameState.WelcomeScreen;
-
-        // Find the WelcomeScreen component and assign it to _welcomeScreen
-        if (_welcomeScreen == null)
-        {
-            _welcomeScreen = FindObjectOfType<WelcomeScreen>();
-        }
-        // Same for the Quiz Screen
-        if (_quizScreen == null)
-        {
-            _quizScreen = FindObjectOfType<QuizScreen>();
-        }
+        // Update the _currentQuizGameState to WelcomeScreen
+        UpdateCurrentQuizGameState(QuizGameState.WelcomeScreen);
 
         FetchPlaylistsFromLocalJSON();
+    }
+
+    private void OnDestroy()
+    {
+        EventManager.OnQuizAssetReady -= OnQuizAssetReady;
     }
 
     private void FetchPlaylistsFromLocalJSON()
@@ -75,11 +64,10 @@ public class QuizGameManager : MonoBehaviour
 
             // Pass the json to JsonUtility, and tell it to create a Playlists object from it
             _playlists = JsonUtility.FromJson<Playlists>("{\"playlists\":" + dataAsJson + "}");
-
-            // Refresh the playlists list on the WelcomeScreen UI component
-            _welcomeScreen.RefreshPlaylistsList();
-
             Debug.Log(_playlists.playlists.Length + " playlists were successfully loaded!");
+
+            // Invoke the OnPlaylistsFetched event
+            EventManager.OnPlaylistsFetched.Invoke();
         }
         else
         {
@@ -101,17 +89,15 @@ public class QuizGameManager : MonoBehaviour
             return;
         }
 
-        // Update the _currentQuizGameState to PreparingQuiz
-        _currentQuizGameState = QuizGameState.PreparingQuiz;
         // Prepare the quiz after updating _currentQuizGameState value
-        StartCoroutine(PrepareQuiz(playlistId));
+        PrepareQuiz(playlistId);
     }
 
-    private IEnumerator PrepareQuiz(int playlistId)
+    private void PrepareQuiz(int playlistId)
     {
-        if (_currentQuizGameState != QuizGameState.PreparingQuiz)
+        if (_currentQuizGameState == QuizGameState.PreparingQuiz)
         {
-            yield break;
+            return;
         }
 
         // Set the _currentQuizPlaylist using the given playlistId
@@ -121,28 +107,21 @@ public class QuizGameManager : MonoBehaviour
         _currentQuizQuestionId = 0;
         _currentQuizAnswerIds = new List<int>();
 
-        // Get the urls of all the song clips for all the questions
-        List<string> songClipUrls = new List<string>();
-        // Get the urls of all the songs thumbnails for all the questions
-        List<string> songThumbnailUrls = new List<string>();
+        // Update the _currentQuizGameState to PreparingQuiz
+        UpdateCurrentQuizGameState(QuizGameState.PreparingQuiz);
+    }
 
-        foreach (Question question in _currentQuizPlaylist.questions)
-        {
-            songClipUrls.Add(question.song.sample);
-            songThumbnailUrls.Add(question.song.picture);
-        }
-        
-        // Start a coroutine that will download all the song clips and thumbnails from the web and add them to a separate list
-        yield return StartCoroutine(_quizScreen.GetSongClips(songClipUrls));
-        yield return StartCoroutine(_quizScreen.GetSongThumbnails(songThumbnailUrls));
+    private void UpdateCurrentQuizGameState(QuizGameState quizGameState)
+    {
+        _currentQuizGameState = quizGameState;
 
-        // Update the _currentQuizGameState value to QuizScreen now that both the song clips and thumbnails have been fetched
-        _currentQuizGameState = QuizGameState.QuizScreen;
+        EventManager.OnQuizGameStateChanged.Invoke(_currentQuizGameState);
+    }
 
-        // Make the Welcome Screen UI shrink with a delay using Tweening. Then disable the welcome screen gameobject once the animation is completed
-        _welcomeScreen.background.transform.DOScale(0, 0.25f).OnComplete(delegate { _welcomeScreen.background.gameObject.SetActive(false); });
-
-        _quizScreen.OnQuizStarted();
+    private void OnQuizAssetReady()
+    {
+        // If the quiz assets are ready to use, update the current quiz game state to QuizScreen
+        UpdateCurrentQuizGameState(QuizGameState.QuizScreen);
     }
 }
 
