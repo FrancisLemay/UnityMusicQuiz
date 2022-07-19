@@ -13,9 +13,6 @@ public class QuizScreen : MonoBehaviour
 
     public AudioSource audioSource;
 
-    public Color validChoiceColor;
-    public Color invalidChoiceColor;
-
     [SerializeField]
     private List<ChoiceButton> _choiceButtons = new List<ChoiceButton>();
 
@@ -23,14 +20,14 @@ public class QuizScreen : MonoBehaviour
     {
         EventManager.OnQuizGameStateChanged += OnQuizGameStateChanged;
         EventManager.OnChoiceSelected += OnChoiceSelected;
-        EventManager.OnNextQuestionRequested += LoadCurrentQuestion;
+        EventManager.LoadNextQuestion += LoadCurrentQuestion;
     }
 
     private void OnDestroy()
     {
         EventManager.OnQuizGameStateChanged -= OnQuizGameStateChanged;
         EventManager.OnChoiceSelected -= OnChoiceSelected;
-        EventManager.OnNextQuestionRequested -= LoadCurrentQuestion;
+        EventManager.LoadNextQuestion -= LoadCurrentQuestion;
     }
 
     #region Quiz Game State Functions
@@ -38,6 +35,12 @@ public class QuizScreen : MonoBehaviour
     {
         switch (quizGameState)
         {
+            case QuizGameManager.QuizGameState.WelcomeScreen:
+                if (QuizGameManager.Instance.CurrentQuizPlaylist != null)
+                {
+                    ResetQuizScreen();
+                }
+                break;
             case QuizGameManager.QuizGameState.PreparingQuiz:
                 OnPreparingQuiz();
                 break;
@@ -45,7 +48,7 @@ public class QuizScreen : MonoBehaviour
                 OnQuizStarted();
                 break;
             case QuizGameManager.QuizGameState.ResultScreen:
-                background.transform.DOScale(0, 0.5f).OnComplete(delegate { background.gameObject.SetActive(false); });
+                background.transform.DOScale(0, 0.5f);
                 break;
             default:
                 break;
@@ -85,6 +88,30 @@ public class QuizScreen : MonoBehaviour
 
         PlayCurrentQuestionSongClip();
     }
+
+    private void ResetQuizScreen()
+    {
+        // If there was a clip already loaded, clear it before loading the first question
+        if (audioSource != null)
+        {
+            audioSource.clip = null;
+        }
+
+        // If there was a thumbnail already loaded, clear it
+        if (songClipThumbnail != null)
+        {
+            songClipThumbnail.sprite = null;
+        }
+
+        // Reset choices text
+        ApplyChoiceTexts(true);
+
+        // Make sure choice validity outlines are not visible
+        UpdateChoiceValidityOutlineVisibility(false);
+
+        // Update the title text to: Preparing Quiz...
+        UpdateQuizTitleText("Preparing Quiz...");
+    }
     #endregion
 
     #region Quiz UI Functions
@@ -100,10 +127,15 @@ public class QuizScreen : MonoBehaviour
 
     private void DisplaySongThumbnail(Texture2D texture2D = null)
     {
+        if (songClipThumbnail == null)
+        {
+            return;
+        }
+
         songClipThumbnail.sprite = texture2D != null ? Sprite.Create(texture2D, new Rect(0f, 0f, texture2D.width, texture2D.height), new Vector2(0.5f, 0.5f), 100) : null;
     }
 
-    private void ApplyChoiceTexts()
+    private void ApplyChoiceTexts(bool resetChoices = false)
     {
         if (_choiceButtons == null)
         {
@@ -113,7 +145,7 @@ public class QuizScreen : MonoBehaviour
         Question currentQuestion = QuizGameManager.Instance.CurrentQuizPlaylist.questions[QuizGameManager.Instance.CurrentQuizQuestionId];
         for (int i = 0; i < currentQuestion.choices.Length; i++)
         {
-            _choiceButtons[i].choiceText.text = currentQuestion.choices[i].artist + " / " + currentQuestion.choices[i].title;
+            _choiceButtons[i].choiceText.text = !resetChoices ? (currentQuestion.choices[i].artist + " / " + currentQuestion.choices[i].title) : "";
         }
     }
 
@@ -132,7 +164,7 @@ public class QuizScreen : MonoBehaviour
             if (isVisible)
             {
                 // update the outline color of the choice button depending if its the right answer choice or not.
-                _choiceButtons[i].choiceValidityOutlineImage.color = i == currentQuestion.answerIndex ? validChoiceColor : invalidChoiceColor;
+                _choiceButtons[i].choiceValidityOutlineImage.color = i == currentQuestion.answerIndex ? QuizGameManager.Instance.validChoiceColor : QuizGameManager.Instance.invalidChoiceColor;
             }
 
             _choiceButtons[i].choiceValidityOutlineImage.gameObject.SetActive(isVisible);

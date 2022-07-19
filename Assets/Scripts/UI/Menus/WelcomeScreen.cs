@@ -53,6 +53,10 @@ public class WelcomeScreen : MonoBehaviour
     {
         switch (quizGameState)
         {
+            case QuizGameManager.QuizGameState.WelcomeScreen:
+                background.gameObject.SetActive(true);
+                background.transform.DOScale(1, 0.5f);
+                break;
             case QuizGameManager.QuizGameState.PreparingQuiz:
                 background.transform.DOScale(0, 0.5f).OnComplete(delegate { background.gameObject.SetActive(false); });
                 break;

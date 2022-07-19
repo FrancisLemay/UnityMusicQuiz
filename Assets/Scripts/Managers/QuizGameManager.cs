@@ -26,9 +26,13 @@ public class QuizGameManager : MonoBehaviour
     public int CurrentQuizQuestionId { get { return _currentQuizQuestionId; } }
 
     private List<int> _currentQuizAnswerIds = new List<int>();
+    public List<int> CurrentQuizAnswersIds { get { return _currentQuizAnswerIds; } }
 
     private Playlist _currentQuizPlaylist = null;
     public Playlist CurrentQuizPlaylist { get { return _currentQuizPlaylist; } }
+
+    public Color validChoiceColor;
+    public Color invalidChoiceColor;
 
 
     private void Awake()
@@ -36,8 +40,9 @@ public class QuizGameManager : MonoBehaviour
         _instance = this;
 
         EventManager.OnPlaylistSelected += PrepareQuiz;
-        EventManager.OnQuizAssetReady += OnQuizAssetReady;
+        EventManager.OnQuizAssetsReady += OnQuizAssetReady;
         EventManager.OnChoiceSelected += OnChoiceSelected;
+        EventManager.OnQuizResultsClosed += OnQuizResultsClosed;
     }
 
     // Start is called before the first frame update
@@ -52,8 +57,9 @@ public class QuizGameManager : MonoBehaviour
     private void OnDestroy()
     {
         EventManager.OnPlaylistSelected -= PrepareQuiz;
-        EventManager.OnQuizAssetReady -= OnQuizAssetReady;
+        EventManager.OnQuizAssetsReady -= OnQuizAssetReady;
         EventManager.OnChoiceSelected -= OnChoiceSelected;
+        EventManager.OnQuizResultsClosed -= OnQuizResultsClosed;
     }
 
     private void UpdateCurrentQuizGameState(QuizGameState quizGameState)
@@ -128,28 +134,36 @@ public class QuizGameManager : MonoBehaviour
         // Add the choice to the _currentQuizAnswerIds list
         _currentQuizAnswerIds.Add(choiceIndex);
 
-        // Start coroutine to check for quiz end
+        // Start a coroutine to check for the quiz end
         StartCoroutine(CheckForQuizEnd());
     }
 
     private IEnumerator CheckForQuizEnd()
     {
+        // Wait for a short delay before loading the next question.
         yield return new WaitForSeconds(2f);
 
         _currentQuizQuestionId++;
 
+        // If the _currentQuizQuestionId is less than the length of questions inside the current quiz playlist, load the next question. Otherwise, trigger the result screen UI.
         if (_currentQuizQuestionId < _currentQuizPlaylist.questions.Length)
         {
-            EventManager.OnNextQuestionRequested.Invoke();
+            EventManager.LoadNextQuestion.Invoke();
         }
         else
         {
-            // Update the _currentQuizGameState to ResultScreen to trigger the results screen
+            _currentQuizQuestionId = 0;
             UpdateCurrentQuizGameState(QuizGameState.ResultScreen);
         }
     }
+
+    private void OnQuizResultsClosed()
+    {
+        UpdateCurrentQuizGameState(QuizGameState.WelcomeScreen);
+    }
 }
 
+#region Playlist Constructor Classes
 [System.Serializable]
 public class Playlists
 {
@@ -189,3 +203,4 @@ public class Song
     public string picture;
     public string sample;
 }
+#endregion

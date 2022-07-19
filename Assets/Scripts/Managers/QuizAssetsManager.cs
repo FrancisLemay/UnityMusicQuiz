@@ -58,7 +58,7 @@ public class QuizAssetsManager : MonoBehaviour
         yield return StartCoroutine(GetSongClips(songClipUrls));
         yield return StartCoroutine(GetSongThumbnails(songThumbnailUrls));
 
-        EventManager.OnQuizAssetReady.Invoke();
+        EventManager.OnQuizAssetsReady.Invoke();
     }
 
     #region Quiz Assets Functions
