@@ -338,7 +338,7 @@ PrefabInstance:
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1012674913}
+      objectReference: {fileID: 1615737978}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -349,7 +349,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: QuizScreen, Assembly-CSharp
+      value: ChoiceButton, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -1413,7 +1413,7 @@ PrefabInstance:
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1012674913}
+      objectReference: {fileID: 1615737978}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -1424,7 +1424,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: QuizScreen, Assembly-CSharp
+      value: ChoiceButton, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -2054,7 +2054,7 @@ PrefabInstance:
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1012674913}
+      objectReference: {fileID: 1615737978}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -2065,7 +2065,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: QuizScreen, Assembly-CSharp
+      value: ChoiceButton, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -2195,7 +2195,7 @@ PrefabInstance:
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1012674913}
+      objectReference: {fileID: 1615737978}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -2206,7 +2206,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: QuizScreen, Assembly-CSharp
+      value: ChoiceButton, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 9071408274734113339, guid: 5ff0e298b4835c94d9803e0aa82861c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName

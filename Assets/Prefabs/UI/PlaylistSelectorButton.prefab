@@ -123,7 +123,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2332764634729606525}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3421753695069344424}
+        m_TargetAssemblyTypeName: PlaylistSelector, Assembly-CSharp
+        m_MethodName: OnPlaylistPressed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &3421753695069344424
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,7 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa4c4c92654a45d4e9c44200fce2aaf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playlistSelectorButton: {fileID: 2332764634568112758}
   playlistTitleText: {fileID: 2332764634729606525}
 --- !u!1 &2332764634729606523
 GameObject:

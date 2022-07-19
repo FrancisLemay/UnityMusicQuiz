@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -34,7 +35,9 @@ public class QuizGameManager : MonoBehaviour
     {
         _instance = this;
 
+        EventManager.OnPlaylistSelected += PrepareQuiz;
         EventManager.OnQuizAssetReady += OnQuizAssetReady;
+        EventManager.OnChoiceSelected += OnChoiceSelected;
     }
 
     // Start is called before the first frame update
@@ -48,7 +51,16 @@ public class QuizGameManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        EventManager.OnPlaylistSelected -= PrepareQuiz;
         EventManager.OnQuizAssetReady -= OnQuizAssetReady;
+        EventManager.OnChoiceSelected -= OnChoiceSelected;
+    }
+
+    private void UpdateCurrentQuizGameState(QuizGameState quizGameState)
+    {
+        _currentQuizGameState = quizGameState;
+
+        EventManager.OnQuizGameStateChanged.Invoke(_currentQuizGameState);
     }
 
     private void FetchPlaylistsFromLocalJSON()
@@ -75,28 +87,16 @@ public class QuizGameManager : MonoBehaviour
         }
     }
 
-    public void OnPlaylistSelected(int playlistId)
+    private void PrepareQuiz(int playlistId)
     {
-        if (_currentQuizGameState != QuizGameState.WelcomeScreen)
+        if (_currentQuizGameState == QuizGameState.PreparingQuiz)
         {
-            Debug.LogWarning("Current Quiz Game State is not WelcomeScreen, skipping OnPlaylistSelected() call...");
             return;
         }
 
         if (_playlists == null || _playlists.playlists[playlistId] == null)
         {
-            Debug.LogWarning("The selected playlist is not valid!");
-            return;
-        }
-
-        // Prepare the quiz after updating _currentQuizGameState value
-        PrepareQuiz(playlistId);
-    }
-
-    private void PrepareQuiz(int playlistId)
-    {
-        if (_currentQuizGameState == QuizGameState.PreparingQuiz)
-        {
+            Debug.LogWarning("The selected playlist is not valid! Skipping PrepareQuiz()...");
             return;
         }
 
@@ -111,17 +111,42 @@ public class QuizGameManager : MonoBehaviour
         UpdateCurrentQuizGameState(QuizGameState.PreparingQuiz);
     }
 
-    private void UpdateCurrentQuizGameState(QuizGameState quizGameState)
-    {
-        _currentQuizGameState = quizGameState;
-
-        EventManager.OnQuizGameStateChanged.Invoke(_currentQuizGameState);
-    }
-
     private void OnQuizAssetReady()
     {
         // If the quiz assets are ready to use, update the current quiz game state to QuizScreen
         UpdateCurrentQuizGameState(QuizGameState.QuizScreen);
+    }
+    
+    private void OnChoiceSelected(int choiceIndex)
+    {
+        if (_currentQuizAnswerIds.Count > _currentQuizQuestionId)
+        {
+            Debug.LogWarning("A choice was already made for question: " + _currentQuizQuestionId);
+            return;
+        }
+
+        // Add the choice to the _currentQuizAnswerIds list
+        _currentQuizAnswerIds.Add(choiceIndex);
+
+        // Start coroutine to check for quiz end
+        StartCoroutine(CheckForQuizEnd());
+    }
+
+    private IEnumerator CheckForQuizEnd()
+    {
+        yield return new WaitForSeconds(2f);
+
+        _currentQuizQuestionId++;
+
+        if (_currentQuizQuestionId < _currentQuizPlaylist.questions.Length)
+        {
+            EventManager.OnNextQuestionRequested.Invoke();
+        }
+        else
+        {
+            // Update the _currentQuizGameState to ResultScreen to trigger the results screen
+            UpdateCurrentQuizGameState(QuizGameState.ResultScreen);
+        }
     }
 }
 

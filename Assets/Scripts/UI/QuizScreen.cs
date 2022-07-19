@@ -22,11 +22,15 @@ public class QuizScreen : MonoBehaviour
     private void Awake()
     {
         EventManager.OnQuizGameStateChanged += OnQuizGameStateChanged;
+        EventManager.OnChoiceSelected += OnChoiceSelected;
+        EventManager.OnNextQuestionRequested += LoadCurrentQuestion;
     }
 
     private void OnDestroy()
     {
         EventManager.OnQuizGameStateChanged -= OnQuizGameStateChanged;
+        EventManager.OnChoiceSelected -= OnChoiceSelected;
+        EventManager.OnNextQuestionRequested -= LoadCurrentQuestion;
     }
 
     #region Quiz Game State Functions
@@ -39,6 +43,9 @@ public class QuizScreen : MonoBehaviour
                 break;
             case QuizGameManager.QuizGameState.QuizScreen:
                 OnQuizStarted();
+                break;
+            case QuizGameManager.QuizGameState.ResultScreen:
+                background.transform.DOScale(0, 0.5f).OnComplete(delegate { background.gameObject.SetActive(false); });
                 break;
             default:
                 break;
@@ -57,15 +64,24 @@ public class QuizScreen : MonoBehaviour
         }
 
         // Update the title text to: Preparing Quiz...
-        UpdateQuizTitleText("Preparing Quiz...");
+        UpdateQuizTitleText("Preparing Quiz... / " + QuizGameManager.Instance.CurrentQuizPlaylist.playlist);
     }
 
     private void OnQuizStarted()
     {
         // Update the title text to the playlist name
-        UpdateQuizTitleText("Guess the song | " + QuizGameManager.Instance.CurrentQuizPlaylist.playlist);
+        UpdateQuizTitleText("Guess the song / " + QuizGameManager.Instance.CurrentQuizPlaylist.playlist);
+
+        LoadCurrentQuestion();
+    }
+
+    private void LoadCurrentQuestion()
+    {
+        DisplaySongThumbnail();
 
         ApplyChoiceTexts();
+
+        UpdateChoiceValidityOutlineVisibility(false);
 
         PlayCurrentQuestionSongClip();
     }
@@ -82,6 +98,11 @@ public class QuizScreen : MonoBehaviour
         title.text = text;
     }
 
+    private void DisplaySongThumbnail(Texture2D texture2D = null)
+    {
+        songClipThumbnail.sprite = texture2D != null ? Sprite.Create(texture2D, new Rect(0f, 0f, texture2D.width, texture2D.height), new Vector2(0.5f, 0.5f), 100) : null;
+    }
+
     private void ApplyChoiceTexts()
     {
         if (_choiceButtons == null)
@@ -93,27 +114,29 @@ public class QuizScreen : MonoBehaviour
         for (int i = 0; i < currentQuestion.choices.Length; i++)
         {
             _choiceButtons[i].choiceText.text = currentQuestion.choices[i].artist + " / " + currentQuestion.choices[i].title;
-            
-            // update the outline color of the choice button depending if its the right answer choice or not.
-            _choiceButtons[i].choiceValidityOutlineImage.color = i == currentQuestion.answerIndex ? validChoiceColor : invalidChoiceColor;
-            _choiceButtons[i].choiceValidityOutlineImage.gameObject.SetActive(false);
         }
     }
 
-    public void OnChoiceButtonPressed()
+    private void UpdateChoiceValidityOutlineVisibility(bool isVisible)
     {
+        if (_choiceButtons == null)
+        {
+            return;
+        }
+
+        Question currentQuestion = QuizGameManager.Instance.CurrentQuizPlaylist.questions[QuizGameManager.Instance.CurrentQuizQuestionId];
+
         // Make all the choice buttons outlines visible to display which choice was the correct answer.
         for (int i = 0; i < _choiceButtons.Count; i++)
         {
-            _choiceButtons[i].choiceValidityOutlineImage.gameObject.SetActive(true);
+            if (isVisible)
+            {
+                // update the outline color of the choice button depending if its the right answer choice or not.
+                _choiceButtons[i].choiceValidityOutlineImage.color = i == currentQuestion.answerIndex ? validChoiceColor : invalidChoiceColor;
+            }
+
+            _choiceButtons[i].choiceValidityOutlineImage.gameObject.SetActive(isVisible);
         }
-
-        // Display the clip thumbnail for the question
-        Texture2D tempTexture2D = QuizAssetsManager.Instance.QuizSongThumbnails[QuizGameManager.Instance.CurrentQuizQuestionId];
-        songClipThumbnail.sprite = Sprite.Create(tempTexture2D, new Rect(0f, 0f, tempTexture2D.width, tempTexture2D.height), new Vector2(0.5f, 0.5f), 100);
-
-        // TODO Update choice that was selected and go through the next question
-        _choiceButtons[0].transform.GetSiblingIndex();
     }
 
     private void PlayCurrentQuestionSongClip()
@@ -125,6 +148,15 @@ public class QuizScreen : MonoBehaviour
 
         audioSource.clip = QuizAssetsManager.Instance.QuizSongClips[QuizGameManager.Instance.CurrentQuizQuestionId];
         audioSource.Play();
+    }
+
+    private void OnChoiceSelected(int choiceIndex)
+    {
+        // Make all the choice buttons outlines visible to display which choice was the correct answer.
+        UpdateChoiceValidityOutlineVisibility(true);
+
+        // Display the song thumbnail for the question
+        DisplaySongThumbnail(QuizAssetsManager.Instance.QuizSongThumbnails[QuizGameManager.Instance.CurrentQuizQuestionId]);
     }
     #endregion
 }
