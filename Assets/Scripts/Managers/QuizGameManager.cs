@@ -34,7 +34,6 @@ public class QuizGameManager : MonoBehaviour
     public Color validChoiceColor;
     public Color invalidChoiceColor;
 
-
     private void Awake()
     {
         _instance = this;

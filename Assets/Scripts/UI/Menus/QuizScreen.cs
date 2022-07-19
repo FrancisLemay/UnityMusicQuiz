@@ -11,7 +11,7 @@ public class QuizScreen : MonoBehaviour
 
     public Image songClipThumbnail;
 
-    public AudioSource audioSource;
+    public AudioSource songClipAudioSource;
 
     [SerializeField]
     private List<ChoiceButton> _choiceButtons = new List<ChoiceButton>();
@@ -92,9 +92,9 @@ public class QuizScreen : MonoBehaviour
     private void ResetQuizScreen()
     {
         // If there was a clip already loaded, clear it before loading the first question
-        if (audioSource != null)
+        if (songClipAudioSource != null)
         {
-            audioSource.clip = null;
+            songClipAudioSource.clip = null;
         }
 
         // If there was a thumbnail already loaded, clear it
@@ -173,13 +173,16 @@ public class QuizScreen : MonoBehaviour
 
     private void PlayCurrentQuestionSongClip()
     {
-        if (audioSource == null)
+        if (songClipAudioSource == null)
         {
             return;
         }
 
-        audioSource.clip = QuizAssetsManager.Instance.QuizSongClips[QuizGameManager.Instance.CurrentQuizQuestionId];
-        audioSource.Play();
+        // Update the clip for the current question
+        songClipAudioSource.clip = QuizAssetsManager.Instance.QuizSongClips[QuizGameManager.Instance.CurrentQuizQuestionId];
+        // Make sure the volume is set back to 1 before playing the clip
+        songClipAudioSource.volume = 1;
+        songClipAudioSource.Play();
     }
 
     private void OnChoiceSelected(int choiceIndex)
@@ -189,6 +192,12 @@ public class QuizScreen : MonoBehaviour
 
         // Display the song thumbnail for the question
         DisplaySongThumbnail(QuizAssetsManager.Instance.QuizSongThumbnails[QuizGameManager.Instance.CurrentQuizQuestionId]);
+
+        // If the song is still playing, stop it
+        if (songClipAudioSource.isPlaying)
+        {
+            songClipAudioSource.DOFade(0, 1f);
+        }
     }
     #endregion
 }

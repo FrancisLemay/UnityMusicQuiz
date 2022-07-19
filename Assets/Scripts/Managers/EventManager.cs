@@ -32,5 +32,8 @@ public static class EventManager
     /// </summary>
     public static UnityAction LoadNextQuestion;
 
+    /// <summary>
+    /// Triggered when the quiz results screen UI is closed.
+    /// </summary>
     public static UnityAction OnQuizResultsClosed;
 }

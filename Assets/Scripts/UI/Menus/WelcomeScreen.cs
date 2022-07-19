@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class WelcomeScreen : MonoBehaviour
 {
+    // This rect transform will be used for the growing/shrinking animation
     public RectTransform background;
 
     public ScrollRect playlistScrollRect;
@@ -44,8 +45,7 @@ public class WelcomeScreen : MonoBehaviour
             GameObject temp = Instantiate(playlistPrefab, playlistScrollRect.content);
 
             temp.TryGetComponent(out PlaylistSelector tempPlaylistSelector);
-
-            tempPlaylistSelector.LoadPlaylistInfo(i, QuizGameManager.Instance.Playlists.playlists[i].playlist);
+            tempPlaylistSelector.playlistTitleText.text = QuizGameManager.Instance.Playlists.playlists[i].playlist;
         }
     }
 
